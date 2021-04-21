@@ -1,26 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+﻿using UnityEngine;
 
 public class EscapeDoor : MonoBehaviour
 {
     [SerializeField] float LevelLoadDelay;
-    [SerializeField] float LevelExitSlowMoFactor = 0.2f;
 
-    private void OnTriggerEnter2D(Collider2D player)
+    public GameSession gameSession;
+
+    private void OnTriggerEnter2D(Collider2D collider)
     {
-        StartCoroutine(LoadNextLevel());
-    }
-
-    IEnumerator LoadNextLevel()
-    {
-        Time.timeScale = LevelExitSlowMoFactor;
-        yield return new WaitForSeconds(LevelLoadDelay);
-        Time.timeScale = 1f;
-
-        var currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
-        SceneManager.LoadScene(currentSceneIndex + 1);
-
+        if(collider.gameObject.layer == Consts.PLAYER_LAYER_ID) { gameSession.LevelEnd(); }
     }
 }

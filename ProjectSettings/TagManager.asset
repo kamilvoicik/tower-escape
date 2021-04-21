@@ -16,7 +16,7 @@ TagManager:
   - Player
   - Ground
   - Enemy
-  - Interactables
+  - Interactive
   - Room
   - Climbing
   - Hazard

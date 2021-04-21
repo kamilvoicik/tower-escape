@@ -1,16 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemySword : MonoBehaviour
 {
-    [SerializeField] int damage = 20;
+    public Config config;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if(collision.gameObject.layer == 8)
         {
-            collision.GetComponent<PlayerBehaviour>().TakeDamage(damage);
+            collision.GetComponent<PlayerCombat>().TakeDamage(config.enemyDamage);
         }
     }
 }

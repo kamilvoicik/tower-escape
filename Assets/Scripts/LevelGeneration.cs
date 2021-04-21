@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class LevelGeneration : MonoBehaviour
 {
@@ -22,7 +20,6 @@ public class LevelGeneration : MonoBehaviour
     #endregion
 
     #region Private Variables
-    private float timeBtwRoom;
     private int direction;
     #endregion
 
@@ -31,9 +28,7 @@ public class LevelGeneration : MonoBehaviour
     {
         int randStartingPos = Random.Range(0, startingPositions.Length);
         transform.position = startingPositions[randStartingPos].position;
-        GameObject instance = (GameObject)Instantiate(rooms[0], transform.position, Quaternion.identity);
-        instance.transform.parent = map.transform;
-
+        GenerateRoom(0);
         Instantiate(player, transform.position, Quaternion.identity);
 
         direction = Random.Range(1, 6);
@@ -41,13 +36,9 @@ public class LevelGeneration : MonoBehaviour
 
     private void Update()
     {
-        if(timeBtwRoom <= 0 && stopGenerate == false)
+        if(stopGenerate == false)
         {
             NextRoomDirection();
-            timeBtwRoom = startTimeBtwRoom;
-        }else
-        {
-            timeBtwRoom -= Time.deltaTime;
         }
     }
 
@@ -59,25 +50,14 @@ public class LevelGeneration : MonoBehaviour
             {
                 upCounter = 0;
 
-                Vector2 newPos = new Vector2(transform.position.x + moveAmount, transform.position.y);
-                transform.position = newPos;
+                NewPositionToGenerateHorizontal(moveAmount);
+                GenerateRandomRoom();
 
-                int rand = Random.Range(0, rooms.Length); // Every room type
-                GameObject instance = (GameObject)Instantiate(rooms[rand], transform.position, Quaternion.identity);
-                instance.transform.parent = map.transform;
-
-                direction = Random.Range(1, 6);
-                if(direction == 3) // More chance to go right instead of going one left
-                {
-                    direction = 2;
-                }else if (direction == 4) // More chance to go up instead of going one left
-                {
-                    direction = 5;
-                }
+                direction = RandomFromArray(new int[] { 1, 2, 5 });
             }
             else
             {
-                direction = 5; // top
+                direction = 5; 
             }
             
         }else if (direction == 3 || direction == 4) // LEFT
@@ -85,14 +65,10 @@ public class LevelGeneration : MonoBehaviour
             if (transform.position.x > minX)
             {
                 upCounter = 0;
-                Vector2 newPos = new Vector2(transform.position.x - moveAmount, transform.position.y);
-                transform.position = newPos;
+                NewPositionToGenerateHorizontal(-moveAmount);
+                GenerateRandomRoom();
 
-                int rand = Random.Range(0, rooms.Length);// Every room type
-                GameObject instance = (GameObject)Instantiate(rooms[rand], transform.position, Quaternion.identity);
-                instance.transform.parent = map.transform;
-
-                direction = Random.Range(3, 6); // Going only left
+                direction = Random.Range(3, 6);
             }
             else
             {
@@ -100,48 +76,31 @@ public class LevelGeneration : MonoBehaviour
             }
                 
         }
-        else if (direction == 5) // UP
+        else // UP
         {
-
             upCounter++;
 
             if(transform.position.y < maxY)
             {
                 Collider2D roomDetection = Physics2D.OverlapCircle(transform.position, 1, room);
+                RoomType roomType = roomDetection.GetComponent<RoomType>();
 
-                if (roomDetection.GetComponent<RoomType>().type != 2 && roomDetection.GetComponent<RoomType>().type != 3) // Makes sure that previous room has a TOP opening
+                if (roomType.type != 2 && roomType.type != 3)
                 {
-                    if (upCounter >=2) // If it goes double UP it makes previous one with every way opening
+                    if (upCounter >=2)
                     {
-                        roomDetection.GetComponent<RoomType>().RoomDestruction();
-                        GameObject instance1 = (GameObject)Instantiate(rooms[3], transform.position, Quaternion.identity);
-                        instance1.transform.parent = map.transform;
+                        roomType.RoomDestruction();
+                        GenerateRoom(3);
                     }
                     else
                     {
-                        roomDetection.GetComponent<RoomType>().RoomDestruction();
-
-                        int randBottomRoom = Random.Range(2, 4);
-                        GameObject instance2 = (GameObject)Instantiate(rooms[randBottomRoom], transform.position, Quaternion.identity);
-                        instance2.transform.parent = map.transform;
-
+                        roomType.RoomDestruction();
+                        GenerateRandomRoomFromTypes(new int[] { 2, 3 });
                     }
-
-                    
                 }
 
-                Vector2 newPos = new Vector2(transform.position.x, transform.position.y + moveAmount);
-                transform.position = newPos;
-
-                int rand = Random.Range(1,4); // Makes room with bottom opening
-                if(rand == 2)
-                {
-                    rand = 3;
-                }
-
-                GameObject instance = (GameObject)Instantiate(rooms[rand], transform.position, Quaternion.identity);
-                instance.transform.parent = map.transform;
-
+                NewPositionToGenerateVectical(moveAmount);
+                GenerateRandomRoomFromTypes(new int[] { 1, 3});
                 direction = Random.Range(1, 6);
 
             }else
@@ -150,5 +109,44 @@ public class LevelGeneration : MonoBehaviour
                 Instantiate(escapeDoor, transform.position, Quaternion.identity);
             }
         }
+    }
+
+    private void GenerateRoom(int numberOfRoom)
+    {
+        GameObject instance = (GameObject)Instantiate(rooms[numberOfRoom], transform.position, Quaternion.identity);
+        instance.transform.parent = map.transform;
+    }
+
+    private void GenerateRandomRoom()
+    {
+        int rand = Random.Range(0, rooms.Length);
+        GameObject instance = (GameObject)Instantiate(rooms[rand], transform.position, Quaternion.identity);
+        instance.transform.parent = map.transform;
+    }
+
+    private void GenerateRandomRoomFromTypes(int[] numbersOfRooms)
+    {
+        int rand = RandomFromArray(numbersOfRooms);
+        GameObject instance = (GameObject)Instantiate(rooms[rand], transform.position, Quaternion.identity);
+        instance.transform.parent = map.transform;
+    }
+
+    private void NewPositionToGenerateHorizontal(float moveAmount)
+    {
+        Vector2 newPos = new Vector2(transform.position.x + moveAmount, transform.position.y);
+        transform.position = newPos;
+    }
+
+    private void NewPositionToGenerateVectical(float moveAmount)
+    {
+        Vector2 newPos = new Vector2(transform.position.x, transform.position.y + moveAmount);
+        transform.position = newPos;
+    }
+
+    public static int RandomFromArray(int[] x)
+    {
+        System.Random random = new System.Random();
+        int index = random.Next(x.Length);
+        return x[index];
     }
 }

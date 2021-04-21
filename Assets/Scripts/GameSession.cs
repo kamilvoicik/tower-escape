@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class GameSession : MonoBehaviour
 {
-    [SerializeField] int playerLives = 3;
-    [SerializeField] int coins = 0;
-
-    [SerializeField] Text livesText;
-    [SerializeField] Text coinsText;
+    private Config config;
+    private ScoreLivesCounter counter;
 
     private void Awake()
     {
-        int numGameSession = FindObjectsOfType<GameSession>().Length; // Singleton pattern, makes it only one Game Session in the session
+        config = GetComponent<Config>();
+        counter = GetComponent<ScoreLivesCounter>();
+
+        int numGameSession = FindObjectsOfType<GameSession>().Length;
         if(numGameSession > 1)
         {
             Destroy(gameObject);
@@ -26,21 +22,9 @@ public class GameSession : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        livesText.text = playerLives.ToString();
-        coinsText.text = coins.ToString();
-    }
-
-    public void AddToScore(int coinsToAdd)
-    {
-        coins += coinsToAdd;
-        coinsText.text = coins.ToString();
-    }
-
     public void ProcessPlayerDeath()
     {
-        if(playerLives > 1)
+        if(counter.currentLives > 1)
         {
             TakeLife();
         }
@@ -50,17 +34,21 @@ public class GameSession : MonoBehaviour
         }
     }
 
+    public void LevelEnd()
+    {
+        SceneManager.LoadScene(Consts.WIN_SCREEN);
+    }
+
     private void ResetGameSession()
     {
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene(Consts.LOSE_SCREEN);
         Destroy(gameObject);
     }
 
     private void TakeLife()
     {
-        playerLives--;
+        counter.SubstractLives();
         var currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(currentSceneIndex);
-        livesText.text = playerLives.ToString();
     }
 }

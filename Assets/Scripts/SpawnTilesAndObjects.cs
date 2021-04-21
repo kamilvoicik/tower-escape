@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class SpawnObject : MonoBehaviour
+public class SpawnTilesAndObjects : MonoBehaviour
 {
     public GameObject[] objects;
 
@@ -10,6 +8,6 @@ public class SpawnObject : MonoBehaviour
     {
         int rand = Random.Range(0, objects.Length);
         GameObject instance = (GameObject)Instantiate(objects[rand], transform.position, Quaternion.identity);
-        instance.transform.parent = transform; // Creates object as child
+        instance.transform.parent = transform; 
     }
 }
