@@ -6,3 +6,8 @@ Project is created with Unity 3D.
 
 ## Setup
 Start the game with Main Menu Scene and hit "Start" button.
+
+## Controls
+Move - Arrows
+Jump - Space
+Attack - Left Ctrl/LMB
